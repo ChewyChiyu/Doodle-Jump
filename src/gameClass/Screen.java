@@ -22,7 +22,7 @@ public class Screen extends JPanel implements Runnable{
 	protected static boolean isRunning;
 	protected boolean doodleAlive = true;
 	protected double numberOfPlatforms = 0;
-	private final int GRAVITY = 7;
+	private int GRAVITY = 7;
 	private int score = 0;
 	protected static int screenW = 600;
 	protected static int screenH = 900;
@@ -239,6 +239,11 @@ public class Screen extends JPanel implements Runnable{
 					}
 					if(doodle.getX()+100>screenW){
 						doodle.setX(-3);
+					}
+					if(doodle.getY()<0){
+						GRAVITY = 13;
+					}else{
+						GRAVITY = 7;
 					}
 					try{
 						Thread.sleep(1);
