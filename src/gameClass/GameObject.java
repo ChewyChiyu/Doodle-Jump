@@ -7,6 +7,7 @@ public abstract class GameObject {
 	protected int y;
 	protected int xVelo;
 	protected int yVelo;
+	protected boolean steppedOn = false;
 	private GameType t;
 
 	protected GameObject(int x, int y, GameType t){

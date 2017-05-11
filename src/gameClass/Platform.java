@@ -8,10 +8,12 @@ public class Platform extends GameObject{
 	protected PlatformType p;
 	protected static int platW = 190;
 	protected static int platH = 45;
-	protected boolean steppedOn = false;
 	protected Platform(int x, int y, PlatformType p) {
 		super(x, y, GameType.PLATFORM);
 		this.p = p;
+		if(p.equals(PlatformType.BLUE)){
+			xVelo = -3;
+		}
 	}
 	PlatformType getP(){
 		return p;

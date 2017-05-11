@@ -13,6 +13,9 @@ public class Texture {
 	public static BufferedImage platformGreen;
 	public static BufferedImage platformWhite;
 	public static BufferedImage gridPaperBack;
+	public static BufferedImage springUp;
+	public static BufferedImage springDown;
+	public static BufferedImage tramp;
 	public Texture(){
 		load();
 	}
@@ -35,7 +38,11 @@ public class Texture {
 			
 			platformRedBroken = doodleSheet1.getSubimage(0, 553, 109, 610-553);
 			
+			springUp = doodleSheet1.getSubimage(0, 500, 38, 554-500);
+			springDown = doodleSheet1.getSubimage(0, 469, 44, 497-469);
 			
+			tramp = ImageIO.read(getClass().getResource("/sprites/Tramp.png"));
+			tramp = tramp.getSubimage(0, 0, 200, 28);
 			gridPaperBack = ImageIO.read(getClass().getResource("/sprites/GridPaperBack.jpg"));
 		}catch(Exception e) { e.printStackTrace(); }
 	}

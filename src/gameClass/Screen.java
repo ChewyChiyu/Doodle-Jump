@@ -27,7 +27,7 @@ public class Screen extends JPanel implements Runnable{
 	protected static int screenW = 600;
 	protected static int screenH = 900;
 	protected static ArrayList<GameObject> sprites = new ArrayList<GameObject>();
-	protected Doodler doodle = new Doodler(screenW/2,(int)(screenH*.1));
+	protected volatile Doodler doodle = new Doodler(screenW/2,(int)(screenH*.1));
 	protected Screen(){
 		sprites.add(doodle);
 		initialPlatforms();
@@ -47,24 +47,24 @@ public class Screen extends JPanel implements Runnable{
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				
+
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				
+
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				
+
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				
+
 			}
-			
+
 		});
 	}
 	void initialPlatforms(){
@@ -72,19 +72,19 @@ public class Screen extends JPanel implements Runnable{
 		int yBuffer = 0;
 		for(int index = 0 ; index < 12; index++){
 			PlatformType p = null;
-			switch((int)(Math.random()*4)){
+			switch((int)(Math.random()*3)){
 			case 0:
 				p = PlatformType.BLUE;
 				break;
 			case 1:
-				p = PlatformType.RED;
-				break;
-			case 2:
 				p = PlatformType.GREEN;
 				break;
-			case 3:
+			case 2:
 				p = PlatformType.WHITE;
 				break;
+			}
+			if((int)(Math.random()*15)==1){
+				p = PlatformType.RED;
 			}
 			sprites.add(new Platform(xBuffer,yBuffer,p));
 			numberOfPlatforms++;
@@ -122,7 +122,7 @@ public class Screen extends JPanel implements Runnable{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				doodle.jump();
+				doodle.flipJump();
 			}
 
 		});
@@ -173,6 +173,14 @@ public class Screen extends JPanel implements Runnable{
 						for(int index = 0; index < sprites.size(); index++){
 							GameObject o = sprites.get(index);
 							if(o.getT().equals(GameType.PLATFORM)){
+								if(((Platform)o).getP().equals(PlatformType.BLUE)){
+									if(o.getX()<=0){
+										o.setxVelo(3);
+									}
+									if(o.getX()+Doodler.doodleW>=screenW){
+										o.setxVelo(-3);
+									}
+								}
 								if(o.getY()<=0){
 									allOnScreen = false;
 								}
@@ -201,6 +209,10 @@ public class Screen extends JPanel implements Runnable{
 									numberOfPlatforms--;
 								}
 							}
+							if(o.getT().equals(GameType.SPRING)||o.getT().equals(GameType.TRAMP)){
+								if(o.getY()>=screenH)
+									sprites.remove(o);
+							}
 						}
 					}
 					try{
@@ -214,23 +226,24 @@ public class Screen extends JPanel implements Runnable{
 				while(isRunning){
 					synchronized(sprites){
 						if(doodle.canJump&&doodle.getyVelo()>0){
-						for(int index = 0; index < sprites.size(); index++){
-							GameObject o = sprites.get(index);
-							if(o.getT().equals(GameType.PLATFORM)){
-								if(((Platform)o).getP().equals(PlatformType.RED)&&((Platform)o).steppedOn){
-									continue;
-								}
-								int platX1 = o.getX();
-								int platX2 = o.getX() + Platform.platW;
-								int platY1 = o.getY();
-								int platY2 = o.getY() + Platform.platH;
-								if(doodle.getX()+Doodler.doodleW/2>platX1&&doodle.getX()+Doodler.doodleW/2<platX2&&doodle.getY()+Doodler.doodleH>platY1&&doodle.getY()+Doodler.doodleH<platY2){
-									doodle.jump();
-									((Platform)o).steppedOn = true;
+							for(int index = 0; index < sprites.size(); index++){
+								GameObject o = sprites.get(index);
+								if(o.getT().equals(GameType.PLATFORM)){
+									if(((Platform)o).getP().equals(PlatformType.RED)&&((Platform)o).steppedOn){
+										continue;
+									}
+									int platX1 = o.getX();
+									int platX2 = o.getX() + Platform.platW;
+									int platY1 = o.getY();
+									int platY2 = o.getY() + Platform.platH;
+									if(doodle.getX()+Doodler.doodleW/2>platX1&&doodle.getX()+Doodler.doodleW/2<platX2&&doodle.getY()+Doodler.doodleH>platY1&&doodle.getY()+Doodler.doodleH<platY2){
+										if(!((Platform)o).getP().equals(PlatformType.RED))
+										doodle.jump();
+										o.steppedOn = true;
+									}
 								}
 							}
 						}
-					}
 					}
 					try{
 						Thread.sleep(1);
@@ -262,6 +275,8 @@ public class Screen extends JPanel implements Runnable{
 					if(doodle.getY()<0){
 						doodle.setY(1);
 						GRAVITY = 12;
+					}else if(doodle.isSuperJumping){
+						GRAVITY = 15;
 					}else{
 						GRAVITY = 7;
 					}
@@ -271,6 +286,54 @@ public class Screen extends JPanel implements Runnable{
 				}
 			}
 		});
+		Thread manageItems = new Thread(new Runnable(){
+			public void run(){
+				while(isRunning){
+					synchronized(sprites){
+						for(int index = 0; index < sprites.size(); index++){
+							GameObject o = sprites.get(index);
+							if(o.getT().equals(GameType.DOODLER)){
+								continue;
+							}
+							if(o.getT().equals(GameType.SPRING)){
+								//bounce with springs
+								int springX = o.getX();
+								int springX2 = o.getX() + Spring.springW;
+								int springY = o.getY();
+								int springY2 = o.getY() + Spring.springH;
+								
+								if(doodle.getX()+Doodler.doodleW/2>springX&&doodle.getX()+Doodler.doodleW/2<springX2&&doodle.getY()+Doodler.doodleH>springY&&doodle.getY()+Doodler.doodleH<springY2){
+									doodle.superJump();
+									o.steppedOn = true;
+									
+								}
+								
+								
+							}
+							if(o.getT().equals(GameType.TRAMP)){
+								//bounce with springs
+								int trampX = o.getX();
+								int trampX2 = o.getX() + Tramp.trampW;
+								int trampY = o.getY();
+								int trampY2 = o.getY() + Tramp.trampH;
+								
+								if(doodle.getX()+Doodler.doodleW/2>trampX&&doodle.getX()+Doodler.doodleW/2<trampX2&&doodle.getY()+Doodler.doodleH>trampY&&doodle.getY()+Doodler.doodleH<trampY2){
+									doodle.flipJump();
+									o.steppedOn = true;
+									
+								}
+								
+								
+							}
+						}
+					}
+					try{
+						Thread.sleep(1);
+					}catch(Exception e) { }
+				}
+			}
+		});
+		manageItems.start();
 		manageBorders.start();
 		manageScore.start();
 		checkForAction.start();
@@ -287,19 +350,28 @@ public class Screen extends JPanel implements Runnable{
 			}
 			yBuffer -= (int)(Math.random()*150)+50;
 			PlatformType p = null;
-			switch((int)(Math.random()*4)){
+			switch((int)(Math.random()*3)){
 			case 0:
 				p = PlatformType.BLUE;
 				break;
 			case 1:
-				p = PlatformType.RED;
-				break;
-			case 2:
 				p = PlatformType.GREEN;
 				break;
-			case 3:
+			case 2:
 				p = PlatformType.WHITE;
 				break;
+			}
+			if((int)(Math.random()*15)==1){
+				p = PlatformType.RED;
+			}
+			//spawning in springs
+			int rand = (int)(Math.random()*10);
+			if(rand <= 3){ 	//3/10 chance
+				if(!p.equals(PlatformType.BLUE)&&!p.equals(PlatformType.RED))
+					sprites.add(new Spring(xBuffer,yBuffer-Platform.platH));
+			}else if(rand == 4){ //1/10 chance
+				if(!p.equals(PlatformType.BLUE)&&!p.equals(PlatformType.RED))
+					sprites.add(new Tramp((int) (xBuffer-Platform.platW/1.5),yBuffer-Tramp.trampH));
 			}
 			sprites.add(new Platform(xBuffer,yBuffer,p));
 			numberOfPlatforms++;
@@ -337,9 +409,9 @@ public class Screen extends JPanel implements Runnable{
 				GameObject o = sprites.get(index);
 				if(o.getT().equals(GameType.DOODLER)){
 					if(!doodle.isJumping)
-					o.setyVelo(GRAVITY);
+						o.setyVelo(GRAVITY);
 				}
-				if(o.getT().equals(GameType.PLATFORM)){
+				if(o.getT().equals(GameType.PLATFORM)||o.getT().equals(GameType.SPRING)||o.getT().equals(GameType.TRAMP)){
 					if(doodle.isJumping){
 						o.setyVelo(GRAVITY);
 					}else{
@@ -364,23 +436,23 @@ public class Screen extends JPanel implements Runnable{
 		drawSprites(g);
 		drawDoodle(g);
 		drawScore(g);
-		
+
 		if(!doodleAlive){
 			g.setFont(new Font("Aerial",Font.BOLD,40));
 			g.drawString("CLICK TO RESTART", 0, 100);
 		}
-		
-		
-		
-		
+
+
+
+
 	}
 	void drawBackDrop(Graphics g){
 		g.drawImage(Texture.gridPaperBack, 0, 0, screenW, screenH,null);
 	}
 	void drawScore(Graphics g){;
-		g.setFont(new Font("Aerial",Font.BOLD,40));
-		g.setColor(Color.BLACK);
-		g.drawString("Score : " + score, 0, 50);
+	g.setFont(new Font("Aerial",Font.BOLD,40));
+	g.setColor(Color.BLACK);
+	g.drawString("Score : " + score, 0, 50);
 	}
 	void drawDoodle(Graphics g){
 		doodle.draw(g);
