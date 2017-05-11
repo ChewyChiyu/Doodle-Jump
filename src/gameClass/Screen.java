@@ -241,7 +241,8 @@ public class Screen extends JPanel implements Runnable{
 						doodle.setX(-3);
 					}
 					if(doodle.getY()<0){
-						GRAVITY = 13;
+						doodle.setY(1);
+						GRAVITY = 12;
 					}else{
 						GRAVITY = 7;
 					}
