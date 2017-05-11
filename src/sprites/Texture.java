@@ -8,6 +8,7 @@ public class Texture {
 	public static BufferedImage doodlerR;
 	public static BufferedImage doodlerL;
 	public static BufferedImage platformRed;
+	public static BufferedImage platformRedBroken;
 	public static BufferedImage platformBlue;
 	public static BufferedImage platformGreen;
 	public static BufferedImage platformWhite;
@@ -31,6 +32,9 @@ public class Texture {
 			platformBlue = doodleSheet1.getSubimage(xBuffer, yBuffer, 103, 30);
 			yBuffer += 30;
 			platformWhite = doodleSheet1.getSubimage(xBuffer, yBuffer, 103, 30);
+			
+			platformRedBroken = doodleSheet1.getSubimage(0, 553, 109, 610-553);
+			
 			
 			gridPaperBack = ImageIO.read(getClass().getResource("/sprites/GridPaperBack.jpg"));
 		}catch(Exception e) { e.printStackTrace(); }

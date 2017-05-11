@@ -71,7 +71,22 @@ public class Screen extends JPanel implements Runnable{
 		int xBuffer = 0;
 		int yBuffer = 0;
 		for(int index = 0 ; index < 12; index++){
-			sprites.add(new Platform(xBuffer,yBuffer,PlatformType.GREEN));
+			PlatformType p = null;
+			switch((int)(Math.random()*4)){
+			case 0:
+				p = PlatformType.BLUE;
+				break;
+			case 1:
+				p = PlatformType.RED;
+				break;
+			case 2:
+				p = PlatformType.GREEN;
+				break;
+			case 3:
+				p = PlatformType.WHITE;
+				break;
+			}
+			sprites.add(new Platform(xBuffer,yBuffer,p));
 			numberOfPlatforms++;
 			switch((int)(Math.random()*2)){
 			case 0:
@@ -202,12 +217,16 @@ public class Screen extends JPanel implements Runnable{
 						for(int index = 0; index < sprites.size(); index++){
 							GameObject o = sprites.get(index);
 							if(o.getT().equals(GameType.PLATFORM)){
+								if(((Platform)o).getP().equals(PlatformType.RED)&&((Platform)o).steppedOn){
+									continue;
+								}
 								int platX1 = o.getX();
 								int platX2 = o.getX() + Platform.platW;
 								int platY1 = o.getY();
 								int platY2 = o.getY() + Platform.platH;
 								if(doodle.getX()+Doodler.doodleW/2>platX1&&doodle.getX()+Doodler.doodleW/2<platX2&&doodle.getY()+Doodler.doodleH>platY1&&doodle.getY()+Doodler.doodleH<platY2){
 									doodle.jump();
+									((Platform)o).steppedOn = true;
 								}
 							}
 						}
@@ -267,7 +286,22 @@ public class Screen extends JPanel implements Runnable{
 				xBuffer = (int)(Math.random()*screenW);
 			}
 			yBuffer -= (int)(Math.random()*150)+50;
-			sprites.add(new Platform(xBuffer,yBuffer,PlatformType.GREEN));
+			PlatformType p = null;
+			switch((int)(Math.random()*4)){
+			case 0:
+				p = PlatformType.BLUE;
+				break;
+			case 1:
+				p = PlatformType.RED;
+				break;
+			case 2:
+				p = PlatformType.GREEN;
+				break;
+			case 3:
+				p = PlatformType.WHITE;
+				break;
+			}
+			sprites.add(new Platform(xBuffer,yBuffer,p));
 			numberOfPlatforms++;
 		}
 	}
