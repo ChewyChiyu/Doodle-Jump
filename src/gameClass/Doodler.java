@@ -24,7 +24,7 @@ public class Doodler extends Character{
 			canJump = false;
 			Thread jumps = new Thread(new Runnable(){
 				public void run(){
-					for(int index = 0; index < 55; index++){
+					for(int index = 0; index < 65; index++){
 						yVelo = -5;
 						try{
 							Thread.sleep(5);

@@ -15,7 +15,7 @@ public abstract class Character extends GameObject{
 						canJump = true;
 					}
 					try{
-						Thread.sleep(500);
+						Thread.sleep(600);
 					}catch(Exception e) { }
 				}
 			}

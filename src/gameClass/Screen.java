@@ -27,7 +27,7 @@ public class Screen extends JPanel implements Runnable{
 	protected static int screenW = 600;
 	protected static int screenH = 900;
 	protected static ArrayList<GameObject> sprites = new ArrayList<GameObject>();
-	protected Doodler doodle = new Doodler(screenW/2,(int)(screenH*.3));
+	protected Doodler doodle = new Doodler(screenW/2,(int)(screenH*.1));
 	protected Screen(){
 		sprites.add(doodle);
 		initialPlatforms();
@@ -125,7 +125,7 @@ public class Screen extends JPanel implements Runnable{
 	void restart(){
 		sprites.clear();
 		doodleAlive = true;
-		doodle = new Doodler(screenW/2,(int)(screenH*.3));
+		doodle = new Doodler(screenW/2,(int)(screenH*.1));
 		sprites.add(doodle);
 		initialPlatforms();
 		score = 0;
@@ -198,7 +198,7 @@ public class Screen extends JPanel implements Runnable{
 			public void run(){
 				while(isRunning){
 					synchronized(sprites){
-						if(doodle.canJump){
+						if(doodle.canJump&&doodle.getyVelo()>0){
 						for(int index = 0; index < sprites.size(); index++){
 							GameObject o = sprites.get(index);
 							if(o.getT().equals(GameType.PLATFORM)){
@@ -231,6 +231,22 @@ public class Screen extends JPanel implements Runnable{
 				}
 			}
 		});
+		Thread manageBorders = new Thread(new Runnable(){
+			public void run(){
+				while(isRunning){
+					if(doodle.getX()<0){
+						doodle.setX(3);
+					}
+					if(doodle.getX()+100>screenW){
+						doodle.setX(-3);
+					}
+					try{
+						Thread.sleep(1);
+					}catch(Exception e) { } 
+				}
+			}
+		});
+		manageBorders.start();
 		manageScore.start();
 		checkForAction.start();
 		destoryPlatforms.start();
