@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import sprites.Texture;
 
 public class Doodler extends Character{
+	protected static int doodleW = 100;
+	protected static int doodleH = 100;
 	protected Doodler(int x, int y) {
 		super(x, y, GameType.DOODLER);
 	}
@@ -12,10 +14,10 @@ public class Doodler extends Character{
 	@Override
 	void draw(Graphics g) {
 		if(xVelo>0){
-		g.drawImage(Texture.doodlerR, x , y , 100 , 100, null);
+		g.drawImage(Texture.doodlerR, x , y , doodleW , doodleH, null);
 		}
 		else{
-			g.drawImage(Texture.doodlerL, x , y , 100 , 100, null);
+			g.drawImage(Texture.doodlerL, x , y , doodleW , doodleH, null);
 		}
 	}
 	synchronized void jump(){

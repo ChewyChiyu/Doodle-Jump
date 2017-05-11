@@ -203,10 +203,10 @@ public class Screen extends JPanel implements Runnable{
 							GameObject o = sprites.get(index);
 							if(o.getT().equals(GameType.PLATFORM)){
 								int platX1 = o.getX();
-								int platX2 = o.getX() + 190;
+								int platX2 = o.getX() + Platform.platW;
 								int platY1 = o.getY();
-								int platY2 = o.getY() + 45;
-								if(doodle.getX()+50>platX1&&doodle.getX()+50<platX2&&doodle.getY()+100>platY1&&doodle.getY()+100<platY2){
+								int platY2 = o.getY() + Platform.platH;
+								if(doodle.getX()+Doodler.doodleW/2>platX1&&doodle.getX()+Doodler.doodleW/2<platX2&&doodle.getY()+Doodler.doodleH>platY1&&doodle.getY()+Doodler.doodleH<platY2){
 									doodle.jump();
 								}
 							}
@@ -257,7 +257,7 @@ public class Screen extends JPanel implements Runnable{
 		int yBuffer = 0;
 		for(int index = 0; index < 20; index++){
 			int xBuffer = (int)(Math.random()*screenW); 
-			while(xBuffer<0||xBuffer>screenW-190){
+			while(xBuffer<0||xBuffer>screenW-Platform.platW){
 				xBuffer = (int)(Math.random()*screenW);
 			}
 			yBuffer -= (int)(Math.random()*150)+50;
