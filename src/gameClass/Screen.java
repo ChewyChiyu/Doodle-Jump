@@ -275,7 +275,7 @@ public class Screen extends JPanel implements Runnable{
 					if(doodle.getY()<0){
 						doodle.setY(1);
 						GRAVITY = 12;
-					}else if(doodle.isSuperJumping){
+					}else if(doodle.isSuperJumping||doodle.isFlipJumping){
 						GRAVITY = 15;
 					}else{
 						GRAVITY = 7;
