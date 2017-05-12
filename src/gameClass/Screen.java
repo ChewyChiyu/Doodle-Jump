@@ -44,7 +44,7 @@ public class Screen extends JPanel implements Runnable{
 			public void mouseClicked(MouseEvent e) {
 				
 				 if(SwingUtilities.isRightMouseButton(e)){
-				        if(!paused){
+				        if(!paused&&doodleAlive){
 				        	paused = true;
 				        	stop();
 				        }
