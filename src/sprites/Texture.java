@@ -7,6 +7,8 @@ import javax.imageio.ImageIO;
 public class Texture {
 	public static BufferedImage doodlerR;
 	public static BufferedImage doodlerL;
+	public static BufferedImage doodleS;
+	public static BufferedImage bullet;
 	public static BufferedImage platformRed;
 	public static BufferedImage platformRedBroken;
 	public static BufferedImage platformBlue;
@@ -16,12 +18,15 @@ public class Texture {
 	public static BufferedImage springUp;
 	public static BufferedImage springDown;
 	public static BufferedImage tramp;
+	public static BufferedImage greenMonster;
+	
 	public Texture(){
 		load();
 	}
 	void load(){
 		try{
 			BufferedImage doodleSheet1 = ImageIO.read(getClass().getResource("/sprites/DoodleJumpSpriteSheet1.png"));
+			BufferedImage doodleSheet2 = ImageIO.read(getClass().getResource("/sprites/DoodleJumpSheet2.png"));
 			doodlerR = doodleSheet1.getSubimage(30, 122, 108-30, 202-122);
 			doodlerL = doodleSheet1.getSubimage(0, 201, 80, 80);
 			
@@ -44,6 +49,12 @@ public class Texture {
 			tramp = ImageIO.read(getClass().getResource("/sprites/Tramp.png"));
 			tramp = tramp.getSubimage(0, 0, 200, 28);
 			gridPaperBack = ImageIO.read(getClass().getResource("/sprites/GridPaperBack.jpg"));
+			doodleS = doodleSheet2.getSubimage(107, 7, 145-107, 66-7);
+			
+			bullet = ImageIO.read(getClass().getResource("/sprites/Bullet.png"));
+			
+			greenMonster = ImageIO.read(getClass().getResource("/sprites/GreenMonster.png"));
+			
 		}catch(Exception e) { e.printStackTrace(); }
 	}
 }

@@ -3,6 +3,7 @@ package gameClass;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 
 import sprites.Texture;
 
@@ -11,7 +12,9 @@ public class Doodler extends Character{
 	protected static int doodleH = 100;
 	protected boolean isSuperJumping = false;
 	protected boolean isFlipJumping = false;
+	protected boolean isShooting = false;
 	protected double angle = 0;
+	protected ArrayList<Projectile> bullets = new ArrayList<Projectile>();
 	protected Doodler(int x, int y) {
 		super(x, y, GameType.DOODLER);
 	}
@@ -20,6 +23,7 @@ public class Doodler extends Character{
 	void draw(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g ;
 		AffineTransform oldXForm = g2d.getTransform();
+		if(!isShooting){
 		if(angle!=0){
 			g2d.translate(x+doodleW/2, y+doodleH/2); 
 			if(xVelo<0){
@@ -41,6 +45,9 @@ public class Doodler extends Character{
 				else{
 					g.drawImage(Texture.doodlerL, x , y , doodleW , doodleH, null);
 				}	
+		}
+		}else{
+			g.drawImage(Texture.doodleS, x , y , doodleW , doodleH, null);
 		}
 		g2d.setTransform(oldXForm); 
 		
@@ -119,4 +126,8 @@ public class Doodler extends Character{
 			
 		}
 	}
+	void shoot(){
+		bullets.add(new Projectile(x+Doodler.doodleW/2,y));
+	}
+	
 }

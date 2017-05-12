@@ -21,9 +21,10 @@ public class Screen extends JPanel implements Runnable{
 	private Thread game;
 	protected static boolean isRunning;
 	protected boolean doodleAlive = true;
+	protected boolean paused = false;
 	protected double numberOfPlatforms = 0;
 	private int GRAVITY = 7;
-	private int score = 0;
+	private volatile int score = 0;
 	protected static int screenW = 600;
 	protected static int screenH = 900;
 	protected static ArrayList<GameObject> sprites = new ArrayList<GameObject>();
@@ -43,26 +44,35 @@ public class Screen extends JPanel implements Runnable{
 				if(!doodleAlive){
 					restart();
 				}
+				
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-
+				if(doodleAlive){
+					doodle.isShooting = true;
+					doodle.shoot();
+					score-=10;
+				}
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-
+				if(doodleAlive){
+					doodle.isShooting = false;
+				}
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-
+				paused = false;
+				start();
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-
+				paused = true;
+				stop();
 			}
 
 		});
@@ -203,7 +213,7 @@ public class Screen extends JPanel implements Runnable{
 					synchronized(sprites){
 						for(int index = 0; index < sprites.size(); index++){
 							GameObject o = sprites.get(index);
-							if(o.getT().equals(GameType.PLATFORM)){
+							if(o.getT().equals(GameType.PLATFORM)||o.getT().equals(GameType.MONSTERS)){
 								if(o.getY()>=screenH){
 									sprites.remove(o);
 									numberOfPlatforms--;
@@ -212,6 +222,14 @@ public class Screen extends JPanel implements Runnable{
 							if(o.getT().equals(GameType.SPRING)||o.getT().equals(GameType.TRAMP)){
 								if(o.getY()>=screenH)
 									sprites.remove(o);
+							}
+						}
+					}
+					synchronized(doodle.bullets){
+						for(int index = 0; index < doodle.bullets.size(); index++){
+							Projectile p = doodle.bullets.get(index);
+							if(p.getY()<-100){
+								doodle.bullets.remove(p);
 							}
 						}
 					}
@@ -333,6 +351,49 @@ public class Screen extends JPanel implements Runnable{
 				}
 			}
 		});
+		Thread manageMonsters = new Thread(new Runnable(){
+			public void run(){
+				while(isRunning){
+					synchronized(sprites){
+						for(int index = 0; index < sprites.size(); index++){
+							GameObject o = sprites.get(index);
+							if(o.getT().equals(GameType.MONSTERS)){
+								if(o.getX()<=0){
+									o.setxVelo(3);
+								}
+								if(o.getX()+Monsters.monsterW>=screenW){
+									o.setxVelo(-3);
+								}
+							
+							//check bullet lists
+							synchronized(doodle.bullets){
+								for(int index2 = 0 ; index2 < doodle.bullets.size(); index2++){
+									Projectile p = doodle.bullets.get(index2);
+									int px1 = p.getX() + Projectile.projW/2;
+									int py1 = p.getY() + Projectile.projH/2;
+									
+									int monsterX1 = o.getX();
+									int monsterX2 = o.getX() + Monsters.monsterW;
+									int monsterY1 = o.getY();
+									int monsterY2 = o.getY() + Monsters.monsterH;
+									
+									if(px1 > monsterX1 && px1 < monsterX2 && py1 > monsterY1 && py1 < monsterY2){
+										sprites.remove(o);
+										doodle.bullets.remove(p);
+										score+=400;
+									}
+								}
+								}
+							}
+						}
+					}
+					try{
+						Thread.sleep(1);
+					}catch(Exception e) { }
+				}
+			}
+		});
+		manageMonsters.start();
 		manageItems.start();
 		manageBorders.start();
 		manageScore.start();
@@ -363,6 +424,9 @@ public class Screen extends JPanel implements Runnable{
 			}
 			if((int)(Math.random()*15)==1){
 				p = PlatformType.RED;
+			}
+			if((int)(Math.random()*8)==1){
+				sprites.add(new Monsters(xBuffer,yBuffer,MonsterType.GREEN));
 			}
 			//spawning in springs
 			int rand = (int)(Math.random()*10);
@@ -411,7 +475,7 @@ public class Screen extends JPanel implements Runnable{
 					if(!doodle.isJumping)
 						o.setyVelo(GRAVITY);
 				}
-				if(o.getT().equals(GameType.PLATFORM)||o.getT().equals(GameType.SPRING)||o.getT().equals(GameType.TRAMP)){
+				if(o.getT().equals(GameType.PLATFORM)||o.getT().equals(GameType.SPRING)||o.getT().equals(GameType.TRAMP)||o.getT().equals(GameType.MONSTERS)){
 					if(doodle.isJumping){
 						o.setyVelo(GRAVITY);
 					}else{
@@ -429,6 +493,13 @@ public class Screen extends JPanel implements Runnable{
 				o.setY(o.getyVelo());
 			}
 		}
+		synchronized(doodle.bullets){
+			for(int index = 0; index < doodle.bullets.size(); index++){
+				Projectile p = doodle.bullets.get(index);
+				p.setX(p.getxVelo());
+				p.setY(p.getyVelo());
+			}
+		}
 	}
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
@@ -436,13 +507,15 @@ public class Screen extends JPanel implements Runnable{
 		drawSprites(g);
 		drawDoodle(g);
 		drawScore(g);
-
 		if(!doodleAlive){
 			g.setFont(new Font("Aerial",Font.BOLD,40));
 			g.drawString("CLICK TO RESTART", 0, 100);
 		}
 
-
+		if(paused){
+			g.setFont(new Font("Aerial",Font.BOLD,100));
+			g.drawString("PAUSED", (int)(screenW*.1), screenH/2);
+		}
 
 
 	}
@@ -465,6 +538,12 @@ public class Screen extends JPanel implements Runnable{
 					continue;
 				}
 				o.draw(g);
+			}
+		}
+		synchronized(doodle.bullets){
+			for(int index = 0; index < doodle.bullets.size(); index++){
+				Projectile p = doodle.bullets.get(index);
+				p.draw(g);
 			}
 		}
 	}

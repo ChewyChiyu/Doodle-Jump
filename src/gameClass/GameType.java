@@ -1,5 +1,5 @@
 package gameClass;
 
 public enum GameType {
-		DOODLER, PLATFORM, SPRING, TRAMP;
+		DOODLER, PLATFORM, SPRING, TRAMP, BULLET, MONSTERS;
 }
