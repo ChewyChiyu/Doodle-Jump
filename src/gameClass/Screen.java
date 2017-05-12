@@ -14,6 +14,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import sprites.Texture;
 @SuppressWarnings("serial")
@@ -32,8 +33,8 @@ public class Screen extends JPanel implements Runnable{
 	protected Screen(){
 		sprites.add(doodle);
 		initialPlatforms();
-		clicks();
 		panel();
+		clicks();
 		start();
 	}
 	void clicks(){
@@ -41,38 +42,55 @@ public class Screen extends JPanel implements Runnable{
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(!doodleAlive){
-					restart();
-				}
+				
+				 if(SwingUtilities.isRightMouseButton(e)){
+				        if(!paused){
+				        	paused = true;
+				        	stop();
+				        }
+				        
+				   }
+				 if(SwingUtilities.isLeftMouseButton(e)){
+				        if(paused){
+				        	paused = false;
+				        	start();
+				        }
+				        if(!doodleAlive){
+							restart();
+						}
+				   }
 				
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if(doodleAlive){
-					doodle.isShooting = true;
-					doodle.shoot();
-					score-=10;
-				}
+				 if(SwingUtilities.isLeftMouseButton(e)){
+					 if(doodleAlive&&!paused){
+							doodle.isShooting = true;
+							doodle.shoot();
+							score-=10;
+						}  
+				   }
+				
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if(doodleAlive){
-					doodle.isShooting = false;
-				}
+				if(SwingUtilities.isLeftMouseButton(e)){
+					if(doodleAlive){
+						doodle.isShooting = false;
+					}
+				   }
+				
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				paused = false;
-				start();
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				paused = true;
-				stop();
+				
 			}
 
 		});
@@ -514,7 +532,8 @@ public class Screen extends JPanel implements Runnable{
 
 		if(paused){
 			g.setFont(new Font("Aerial",Font.BOLD,100));
-			g.drawString("PAUSED", (int)(screenW*.1), screenH/2);
+			g.drawString("CLICK TO", (int)(screenW*.1), screenH/2);
+			g.drawString("UNPAUSED", (int)(screenW*.1), (int) (screenH*.6));
 		}
 
 
